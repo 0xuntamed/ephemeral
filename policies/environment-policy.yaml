@@ -1,0 +1,16 @@
+environment:
+  ttl: 6h
+  max_ttl: 24h
+
+compute:
+  cpu: 512
+  memory: 1024
+  max_cpu: 2048
+  max_memory: 4096
+
+database:
+  mode: shared-schema
+
+limits:
+  max_environments_per_user: 3
+  max_environments_per_repo: 10

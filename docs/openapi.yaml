@@ -1,0 +1,205 @@
+openapi: 3.1.0
+info:
+  title: Ephemera Control Plane API
+  version: 0.1.0
+  description: Desired-state API for pull-request preview environments.
+servers:
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+paths:
+  /healthz:
+    get:
+      security: []
+      summary: Process liveness
+      responses:
+        "200": { description: Process is alive }
+  /readyz:
+    get:
+      security: []
+      summary: Registry readiness
+      responses:
+        "200": { description: Registry is available }
+        "503": { $ref: "#/components/responses/Error" }
+  /api/v1/environments:
+    get:
+      summary: List environments
+      parameters:
+        - { name: status, in: query, schema: { $ref: "#/components/schemas/Status" } }
+        - { name: repository, in: query, schema: { type: string } }
+        - { name: owner, in: query, schema: { type: string } }
+      responses:
+        "200":
+          description: Environment collection
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, total]
+                properties:
+                  items: { type: array, items: { $ref: "#/components/schemas/Environment" } }
+                  total: { type: integer }
+    post:
+      summary: Idempotently request an environment
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema: { type: string, maxLength: 512 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateEnvironment" }
+      responses:
+        "201":
+          description: Environment created
+          content: { application/json: { schema: { $ref: "#/components/schemas/Environment" } } }
+        "200":
+          description: Idempotent replay
+          content: { application/json: { schema: { $ref: "#/components/schemas/Environment" } } }
+        "400": { $ref: "#/components/responses/Error" }
+  /api/v1/environments/{id}:
+    parameters:
+      - $ref: "#/components/parameters/EnvironmentID"
+    get:
+      summary: Get an environment
+      responses:
+        "200":
+          description: Environment
+          content: { application/json: { schema: { $ref: "#/components/schemas/Environment" } } }
+        "404": { $ref: "#/components/responses/Error" }
+    delete:
+      summary: Set desired state to destroyed
+      responses:
+        "202":
+          description: Cleanup scheduled
+          content: { application/json: { schema: { $ref: "#/components/schemas/Environment" } } }
+        "404": { $ref: "#/components/responses/Error" }
+  /api/v1/environments/{id}/extend:
+    parameters:
+      - $ref: "#/components/parameters/EnvironmentID"
+    post:
+      summary: Extend environment TTL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [duration]
+              properties:
+                duration: { type: string, examples: [1h, 30m] }
+      responses:
+        "200":
+          description: Extended environment
+          content: { application/json: { schema: { $ref: "#/components/schemas/Environment" } } }
+        "400": { $ref: "#/components/responses/Error" }
+        "409": { $ref: "#/components/responses/Error" }
+  /api/v1/environments/{id}/retry:
+    parameters:
+      - $ref: "#/components/parameters/EnvironmentID"
+    post:
+      summary: Retry a failed lifecycle operation
+      responses:
+        "202":
+          description: Retry scheduled
+          content: { application/json: { schema: { $ref: "#/components/schemas/Environment" } } }
+        "409": { $ref: "#/components/responses/Error" }
+  /api/v1/reconcile:
+    post:
+      summary: Wake the lifecycle reconciler
+      responses:
+        "202": { description: Reconciliation scheduled }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  parameters:
+    EnvironmentID:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, pattern: "^[a-z0-9][a-z0-9-]{2,62}$" }
+  responses:
+    Error:
+      description: API error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code: { type: string }
+                  message: { type: string }
+  schemas:
+    Status:
+      type: string
+      enum: [REQUESTED, PLANNING, PROVISIONING, HEALTH_CHECK, READY, DESTROYING, DESTROYED, FAILED, DESTROY_FAILED, ORPHANED, FAILED_CLEANED]
+    Resources:
+      type: object
+      required: [cpu, memory, database_mode]
+      properties:
+        cpu: { type: integer, minimum: 1, maximum: 2048, default: 512 }
+        memory: { type: integer, minimum: 1, maximum: 4096, default: 1024 }
+        database_mode: { type: string, enum: [shared-schema, none], default: shared-schema }
+    CreateEnvironment:
+      type: object
+      additionalProperties: false
+      required: [repository, branch, commit_sha, pull_request, owner]
+      properties:
+        repository: { type: string, pattern: "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" }
+        branch: { type: string, maxLength: 200 }
+        commit_sha: { type: string, pattern: "^[A-Fa-f0-9]{7,64}$" }
+        pull_request: { type: integer, minimum: 1 }
+        owner: { type: string }
+        image: { type: string }
+        ttl: { type: string, default: 6h }
+        resources: { $ref: "#/components/schemas/Resources" }
+    Event:
+      type: object
+      required: [at, status, message]
+      properties:
+        at: { type: string, format: date-time }
+        status: { $ref: "#/components/schemas/Status" }
+        message: { type: string }
+    Environment:
+      type: object
+      required: [id, idempotency_key, repository, branch, commit_sha, pull_request, owner, image, status, desired_state, terraform_workspace, resources, created_at, updated_at, expires_at, events]
+      properties:
+        id: { type: string }
+        idempotency_key: { type: string }
+        repository: { type: string }
+        branch: { type: string }
+        commit_sha: { type: string }
+        pull_request: { type: integer }
+        owner: { type: string }
+        image: { type: string }
+        status: { $ref: "#/components/schemas/Status" }
+        desired_state: { type: string, enum: [READY, DESTROYED] }
+        status_message: { type: string }
+        terraform_workspace: { type: string }
+        preview_url: { type: string, format: uri }
+        database_schema: { type: string }
+        routing_priority: { type: integer }
+        resources: { $ref: "#/components/schemas/Resources" }
+        cloud_resources:
+          type: array
+          items:
+            type: object
+            properties:
+              kind: { type: string }
+              id: { type: string }
+        estimated_hourly_cost: { type: number }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        expires_at: { type: string, format: date-time }
+        ready_at: { type: string, format: date-time }
+        destroyed_at: { type: string, format: date-time }
+        last_error: { type: string }
+        provision_attempts: { type: integer }
+        destroy_attempts: { type: integer }
+        events: { type: array, items: { $ref: "#/components/schemas/Event" } }

@@ -1,0 +1,169 @@
+pipeline {
+  agent any
+
+  parameters {
+    choice(name: 'PR_ACTION', choices: ['deploy', 'destroy'], description: 'Provision/update a preview or clean it up.')
+    string(name: 'CONTROLLER_URL', defaultValue: 'https://ephemeral-api.internal', description: 'Control-plane base URL.')
+    string(name: 'REPOSITORY', defaultValue: 'acme/billing-api', description: 'GitHub owner/repository.')
+    string(name: 'PREVIEW_TTL', defaultValue: '6h', description: 'Requested preview lifetime.')
+    string(name: 'ECR_REPOSITORY', defaultValue: '', description: 'ECR repository URL from terraform/platform.')
+    string(name: 'GITHUB_API_URL', defaultValue: 'https://api.github.com', description: 'GitHub or GitHub Enterprise API base URL.')
+  }
+
+  environment {
+    AWS_REGION = 'us-east-1'
+  }
+
+  stages {
+    stage('Validate event') {
+      steps {
+        script {
+          if (!env.CHANGE_ID?.trim()) {
+            error('This pipeline must run as a multibranch pull-request build with CHANGE_ID set.')
+          }
+          if (!params.ECR_REPOSITORY?.trim() && params.PR_ACTION == 'deploy') {
+            error('ECR_REPOSITORY is required for deploy actions.')
+          }
+        }
+      }
+    }
+
+    stage('Checkout') {
+      when { expression { params.PR_ACTION == 'deploy' } }
+      steps { checkout scm }
+    }
+
+    stage('Test in parallel') {
+      when { expression { params.PR_ACTION == 'deploy' } }
+      parallel {
+        stage('Go') {
+          steps { sh 'go test ./...' }
+        }
+        stage('Dashboard') {
+          steps { sh 'cd dashboard && npm ci && npm run check && npm run build' }
+        }
+        stage('Terraform') {
+          steps { sh 'terraform fmt -check -recursive terraform' }
+        }
+      }
+    }
+
+    stage('Build and push immutable image') {
+      when { expression { params.PR_ACTION == 'deploy' } }
+      steps {
+        script {
+          env.IMAGE_TAG = "pr-${env.CHANGE_ID}-${env.GIT_COMMIT.take(12)}"
+          env.IMAGE_URI = "${params.ECR_REPOSITORY}:${env.IMAGE_TAG}"
+        }
+        sh '''
+          aws ecr get-login-password --region "$AWS_REGION" | docker login --username AWS --password-stdin "${ECR_REPOSITORY%%/*}"
+          docker build --label "org.opencontainers.image.revision=$GIT_COMMIT" --build-arg "BUILD_SHA=$GIT_COMMIT" -f examples/demo-service/Dockerfile -t "$IMAGE_URI" .
+          docker push "$IMAGE_URI"
+        '''
+      }
+    }
+
+    stage('Request preview') {
+      when { expression { params.PR_ACTION == 'deploy' } }
+      steps {
+        withCredentials([string(credentialsId: 'ephemeral-controller-token', variable: 'CONTROLLER_TOKEN')]) {
+          writeJSON file: 'environment-request.json', json: [
+            repository: params.REPOSITORY,
+            branch: env.CHANGE_BRANCH ?: env.BRANCH_NAME,
+            commit_sha: env.GIT_COMMIT,
+            pull_request: env.CHANGE_ID as Integer,
+            owner: env.CHANGE_AUTHOR ?: 'jenkins',
+            image: env.IMAGE_URI,
+            ttl: params.PREVIEW_TTL,
+            resources: [cpu: 512, memory: 1024, database_mode: 'shared-schema']
+          ]
+          sh '''
+            curl --fail-with-body --silent --show-error \
+              -H "Authorization: Bearer $CONTROLLER_TOKEN" \
+              -H "Content-Type: application/json" \
+              -H "Idempotency-Key: ${REPOSITORY}:${CHANGE_ID}:${GIT_COMMIT}" \
+              --data @environment-request.json \
+              "$CONTROLLER_URL/api/v1/environments" > environment-response.json
+          '''
+          script {
+            def response = readJSON file: 'environment-response.json'
+            env.ENVIRONMENT_ID = response.id
+          }
+        }
+      }
+    }
+
+    stage('Wait for readiness') {
+      when { expression { params.PR_ACTION == 'deploy' } }
+      steps {
+        withCredentials([string(credentialsId: 'ephemeral-controller-token', variable: 'CONTROLLER_TOKEN')]) {
+          timeout(time: 15, unit: 'MINUTES') {
+            waitUntil(initialRecurrencePeriod: 2000, quiet: true) {
+              def response = httpRequest(
+                url: "${params.CONTROLLER_URL}/api/v1/environments/${env.ENVIRONMENT_ID}",
+                customHeaders: [[name: 'Authorization', value: "Bearer ${CONTROLLER_TOKEN}", maskValue: true]],
+                validResponseCodes: '200'
+              )
+              def item = readJSON text: response.content
+              if (item.status in ['FAILED', 'ORPHANED']) {
+                error("Preview provisioning failed: ${item.last_error}")
+              }
+              if (item.status == 'READY') {
+                env.PREVIEW_URL = item.preview_url
+                return true
+              }
+              return false
+            }
+          }
+        }
+      }
+    }
+
+    stage('Integration smoke test') {
+      when { expression { params.PR_ACTION == 'deploy' } }
+      steps { sh 'curl --fail --retry 6 --retry-delay 5 "$PREVIEW_URL/healthz"' }
+    }
+
+    stage('Publish preview to pull request') {
+      when { expression { params.PR_ACTION == 'deploy' } }
+      steps {
+        withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
+          writeJSON file: 'github-comment.json', json: [body: "✅ Preview environment ready\n\n${env.PREVIEW_URL}\n\nEnvironment: `${env.ENVIRONMENT_ID}` · Expires after ${params.PREVIEW_TTL}"]
+          sh '''
+            curl --fail-with-body --silent --show-error \
+              -H "Authorization: Bearer $GITHUB_TOKEN" \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              --data @github-comment.json \
+              "$GITHUB_API_URL/repos/$REPOSITORY/issues/$CHANGE_ID/comments"
+          '''
+        }
+      }
+    }
+
+    stage('Destroy previews') {
+      when { expression { params.PR_ACTION == 'destroy' } }
+      steps {
+        withCredentials([string(credentialsId: 'ephemeral-controller-token', variable: 'CONTROLLER_TOKEN')]) {
+          sh '''
+            curl --fail-with-body --silent --show-error \
+              -H "Authorization: Bearer $CONTROLLER_TOKEN" \
+              "$CONTROLLER_URL/api/v1/environments?repository=$REPOSITORY" > environments.json
+            jq -r --argjson pr "$CHANGE_ID" '.items[] | select(.pull_request == $pr and .status != "DESTROYED") | .id' environments.json | while read -r id; do
+              [ -n "$id" ] && curl --fail-with-body --silent --show-error -X DELETE -H "Authorization: Bearer $CONTROLLER_TOKEN" "$CONTROLLER_URL/api/v1/environments/$id"
+            done
+          '''
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+      echo(params.PR_ACTION == 'deploy' ? "Preview ready: ${env.PREVIEW_URL}" : 'Preview cleanup requested.')
+    }
+    always {
+      archiveArtifacts artifacts: '*.json', allowEmptyArchive: true
+    }
+  }
+}

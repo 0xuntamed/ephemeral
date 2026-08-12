@@ -1,0 +1,63 @@
+name: ephemeral-platform
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ephemeral
+      POSTGRES_USER: ephemeral
+      POSTGRES_PASSWORD: ephemeral
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ephemeral -d ephemeral"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: controller/Dockerfile
+    environment:
+      LISTEN_ADDRESS: :8080
+      DATABASE_URL: postgres://ephemeral:ephemeral@postgres:5432/ephemeral?sslmode=disable
+      PREVIEW_DATABASE_URL: postgres://ephemeral:ephemeral@postgres:5432/ephemeral?sslmode=disable
+      PROVIDER: demo
+      PREVIEW_DOMAIN: preview.localhost
+      DEFAULT_TTL: 6h
+      MAX_TTL: 24h
+      RUN_WORKER: "true"
+      WORKER_INTERVAL: 1s
+      DEMO_STAGE_DELAY: 500ms
+      DEMO_PREVIEW_BASE_URL: http://localhost:3000/preview
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - terraform-data:/app/terraform/runtime-data
+
+  dashboard:
+    build:
+      context: dashboard
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "3000:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+volumes:
+  postgres-data:
+  terraform-data:

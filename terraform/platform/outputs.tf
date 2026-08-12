@@ -1,0 +1,13 @@
+output "vpc_id" { value = aws_vpc.platform.id }
+output "subnet_ids" { value = aws_subnet.public[*].id }
+output "ecs_cluster_arn" { value = aws_ecs_cluster.platform.arn }
+output "https_listener_arn" { value = aws_lb_listener.https.arn }
+output "task_execution_role_arn" { value = aws_iam_role.task_execution.arn }
+output "task_role_arn" { value = aws_iam_role.task.arn }
+output "service_security_group_id" { value = aws_security_group.workload.id }
+output "database_host" { value = aws_db_instance.platform.address }
+output "database_name" { value = var.database_name }
+output "database_user" { value = var.database_username }
+output "database_password_secret_arn" { value = aws_db_instance.platform.master_user_secret[0].secret_arn }
+output "ecr_repository_url" { value = aws_ecr_repository.demo.repository_url }
+output "preview_wildcard" { value = "*.${var.preview_domain}" }
