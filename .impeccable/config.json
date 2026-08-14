@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-color",
+        "value": "#000",
+        "createdAt": "2026-08-14T14:54:07.057Z",
+        "reason": "false positive: cited lines (globals.css L73/L79) are clip-path polygon percentage values in .torn-edge-bottom, contain no color literal at all; grep for #000 across the file finds no match, and a fresh detect.mjs run on the file returns zero findings"
+      }
+    ]
+  }
+}

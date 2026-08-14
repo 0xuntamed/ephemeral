@@ -1,0 +1,399 @@
+{
+  "source_brand": "#B8321F",
+  "source_hsl": {
+    "h": 7.45,
+    "s": 71.16,
+    "l": 42.16
+  },
+  "nearest_derived_shade": "600",
+  "scale": {
+    "50": "#FCF4F3",
+    "100": "#F8E9E7",
+    "200": "#F2CFCA",
+    "300": "#E8A196",
+    "400": "#E06D5D",
+    "500": "#D23923",
+    "600": "#AF2F1D",
+    "700": "#902718",
+    "800": "#762014",
+    "900": "#57180F",
+    "950": "#2C0C07"
+  },
+  "semantics": {
+    "light": {
+      "background": {
+        "value": "#FFFFFF",
+        "source": "#FFFFFF"
+      },
+      "foreground": {
+        "value": "#2C0C07",
+        "source": "shade:950"
+      },
+      "card": {
+        "value": "#FFFFFF",
+        "source": "#FFFFFF"
+      },
+      "card-foreground": {
+        "value": "#57180F",
+        "source": "shade:900"
+      },
+      "popover": {
+        "value": "#FFFFFF",
+        "source": "#FFFFFF"
+      },
+      "popover-foreground": {
+        "value": "#2C0C07",
+        "source": "shade:950"
+      },
+      "primary": {
+        "value": "#AF2F1D",
+        "source": "shade:600"
+      },
+      "primary-foreground": {
+        "value": "#FFFFFF",
+        "source": "#FFFFFF"
+      },
+      "secondary": {
+        "value": "#F8E9E7",
+        "source": "shade:100"
+      },
+      "secondary-foreground": {
+        "value": "#57180F",
+        "source": "shade:900"
+      },
+      "muted": {
+        "value": "#FCF4F3",
+        "source": "shade:50"
+      },
+      "muted-foreground": {
+        "value": "#AF2F1D",
+        "source": "shade:600"
+      },
+      "accent": {
+        "value": "#F8E9E7",
+        "source": "shade:100"
+      },
+      "accent-foreground": {
+        "value": "#57180F",
+        "source": "shade:900"
+      },
+      "destructive": {
+        "value": "#B91C1C",
+        "source": "#B91C1C"
+      },
+      "destructive-foreground": {
+        "value": "#FFFFFF",
+        "source": "#FFFFFF"
+      },
+      "border": {
+        "value": "#E06D5D",
+        "source": "shade:400"
+      },
+      "input": {
+        "value": "#E06D5D",
+        "source": "shade:400"
+      },
+      "ring": {
+        "value": "#D23923",
+        "source": "shade:500"
+      }
+    },
+    "dark": {
+      "background": {
+        "value": "#2C0C07",
+        "source": "shade:950"
+      },
+      "foreground": {
+        "value": "#FCF4F3",
+        "source": "shade:50"
+      },
+      "card": {
+        "value": "#57180F",
+        "source": "shade:900"
+      },
+      "card-foreground": {
+        "value": "#FCF4F3",
+        "source": "shade:50"
+      },
+      "popover": {
+        "value": "#57180F",
+        "source": "shade:900"
+      },
+      "popover-foreground": {
+        "value": "#FCF4F3",
+        "source": "shade:50"
+      },
+      "primary": {
+        "value": "#E06D5D",
+        "source": "shade:400"
+      },
+      "primary-foreground": {
+        "value": "#2C0C07",
+        "source": "shade:950"
+      },
+      "secondary": {
+        "value": "#762014",
+        "source": "shade:800"
+      },
+      "secondary-foreground": {
+        "value": "#FCF4F3",
+        "source": "shade:50"
+      },
+      "muted": {
+        "value": "#762014",
+        "source": "shade:800"
+      },
+      "muted-foreground": {
+        "value": "#E8A196",
+        "source": "shade:300"
+      },
+      "accent": {
+        "value": "#762014",
+        "source": "shade:800"
+      },
+      "accent-foreground": {
+        "value": "#FCF4F3",
+        "source": "shade:50"
+      },
+      "destructive": {
+        "value": "#EF4444",
+        "source": "#EF4444"
+      },
+      "destructive-foreground": {
+        "value": "#2C0C07",
+        "source": "shade:950"
+      },
+      "border": {
+        "value": "#D23923",
+        "source": "shade:500"
+      },
+      "input": {
+        "value": "#D23923",
+        "source": "shade:500"
+      },
+      "ring": {
+        "value": "#D23923",
+        "source": "shade:500"
+      }
+    }
+  },
+  "contrast_standard": "AA",
+  "contrast_checks": [
+    {
+      "mode": "light",
+      "check": "body text",
+      "foreground": "foreground",
+      "background": "background",
+      "ratio": 18.06,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "mode": "light",
+      "check": "card text",
+      "foreground": "card-foreground",
+      "background": "card",
+      "ratio": 13.61,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "mode": "light",
+      "check": "popover text",
+      "foreground": "popover-foreground",
+      "background": "popover",
+      "ratio": 18.06,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "mode": "light",
+      "check": "primary control text",
+      "foreground": "primary-foreground",
+      "background": "primary",
+      "ratio": 6.47,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "mode": "light",
+      "check": "primary as link",
+      "foreground": "primary",
+      "background": "background",
+      "ratio": 6.47,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "mode": "light",
+      "check": "secondary control text",
+      "foreground": "secondary-foreground",
+      "background": "secondary",
+      "ratio": 11.54,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "mode": "light",
+      "check": "muted text",
+      "foreground": "muted-foreground",
+      "background": "muted",
+      "ratio": 5.97,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "mode": "light",
+      "check": "accent text",
+      "foreground": "accent-foreground",
+      "background": "accent",
+      "ratio": 11.54,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "mode": "light",
+      "check": "destructive control text",
+      "foreground": "destructive-foreground",
+      "background": "destructive",
+      "ratio": 6.47,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "mode": "light",
+      "check": "border on page",
+      "foreground": "border",
+      "background": "background",
+      "ratio": 3.22,
+      "minimum": 3.0,
+      "result": "PASS"
+    },
+    {
+      "mode": "light",
+      "check": "input boundary on page",
+      "foreground": "input",
+      "background": "background",
+      "ratio": 3.22,
+      "minimum": 3.0,
+      "result": "PASS"
+    },
+    {
+      "mode": "light",
+      "check": "focus ring on page",
+      "foreground": "ring",
+      "background": "background",
+      "ratio": 4.83,
+      "minimum": 3.0,
+      "result": "PASS"
+    },
+    {
+      "mode": "dark",
+      "check": "body text",
+      "foreground": "foreground",
+      "background": "background",
+      "ratio": 16.66,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "mode": "dark",
+      "check": "card text",
+      "foreground": "card-foreground",
+      "background": "card",
+      "ratio": 12.56,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "mode": "dark",
+      "check": "popover text",
+      "foreground": "popover-foreground",
+      "background": "popover",
+      "ratio": 12.56,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "mode": "dark",
+      "check": "primary control text",
+      "foreground": "primary-foreground",
+      "background": "primary",
+      "ratio": 5.6,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "mode": "dark",
+      "check": "primary as link",
+      "foreground": "primary",
+      "background": "background",
+      "ratio": 5.6,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "mode": "dark",
+      "check": "secondary control text",
+      "foreground": "secondary-foreground",
+      "background": "secondary",
+      "ratio": 9.75,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "mode": "dark",
+      "check": "muted text",
+      "foreground": "muted-foreground",
+      "background": "muted",
+      "ratio": 5.02,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "mode": "dark",
+      "check": "accent text",
+      "foreground": "accent-foreground",
+      "background": "accent",
+      "ratio": 9.75,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "mode": "dark",
+      "check": "destructive control text",
+      "foreground": "destructive-foreground",
+      "background": "destructive",
+      "ratio": 4.8,
+      "minimum": 4.5,
+      "result": "PASS"
+    },
+    {
+      "mode": "dark",
+      "check": "border on page",
+      "foreground": "border",
+      "background": "background",
+      "ratio": 3.74,
+      "minimum": 3.0,
+      "result": "PASS"
+    },
+    {
+      "mode": "dark",
+      "check": "input boundary on page",
+      "foreground": "input",
+      "background": "background",
+      "ratio": 3.74,
+      "minimum": 3.0,
+      "result": "PASS"
+    },
+    {
+      "mode": "dark",
+      "check": "focus ring on page",
+      "foreground": "ring",
+      "background": "background",
+      "ratio": 3.74,
+      "minimum": 3.0,
+      "result": "PASS"
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-14T00:00:00Z",
+  "title": "Design System: Fliiping Burgers",
+  "extensions": {
+    "colorMeta": {
+      "diner-red": { "role": "primary", "displayName": "Diner Red", "canonical": "#b8321f", "tonalRamp": ["#2e0c07", "#4a130d", "#661a12", "#7c2013", "#b8321f", "#d14a34", "#e37a63", "#f4b8ac"] },
+      "diner-red-dark": { "role": "primary-deep", "displayName": "Diner Red Dark", "canonical": "#7c2013", "tonalRamp": ["#1e0906", "#33100a", "#4d180e", "#661f12", "#7c2013", "#9c3524", "#c26652", "#e3a696"] },
+      "amber": { "role": "secondary", "displayName": "Amber", "canonical": "#e6a13c", "tonalRamp": ["#2e1c08", "#4a2e0e", "#6b4213", "#8f5a19", "#e6a13c", "#eeb464", "#f5cd93", "#fbe6c4"] },
+      "amber-bright": { "role": "secondary-bright", "displayName": "Amber Bright", "canonical": "#ffc772", "tonalRamp": ["#331f08", "#523310", "#754919", "#996121", "#ffc772", "#ffd28f", "#ffdfac", "#ffedcd"] },
+      "brick": { "role": "tertiary", "displayName": "Brick", "canonical": "#5a2c1f", "tonalRamp": ["#170b07", "#26120c", "#3a1c13", "#4a2419", "#5a2c1f", "#7a4432", "#a26a55", "#c99e8c"] },
+      "stage": { "role": "neutral-bg", "displayName": "Stage Black", "canonical": "#121014", "tonalRamp": ["#0a0910", "#121014", "#1c181d", "#2a262c", "#413c44", "#5e5861", "#847d87", "#b3adb6"] },
+      "stage-2": { "role": "neutral-bg-raised", "displayName": "Stage Black Raised", "canonical": "#1c181d", "tonalRamp": ["#0e0c0f", "#1c181d", "#282329", "#363037", "#4d4750", "#6a636c", "#928c93", "#c1bcc2"] },
+      "stage-ink": { "role": "neutral-text-on-dark", "displayName": "Warm Off-White", "canonical": "#f4ead9", "tonalRamp": ["#3a3226", "#5c503d", "#8a7a5f", "#b8a985", "#d6c9ac", "#e8dcc4", "#f4ead9", "#faf5ec"] },
+      "stage-ink-dim": { "role": "neutral-text-on-dark-dim", "displayName": "Muted Warm Grey", "canonical": "#b8ab99", "tonalRamp": ["#2c261f", "#463d33", "#655a4b", "#867a68", "#a89b88", "#b8ab99", "#cdc2b3", "#e3dcd2"] },
+      "paper": { "role": "neutral-bg-2", "displayName": "Ticket Cream", "canonical": "#f1e4c9", "tonalRamp": ["#3d3421", "#5f5133", "#8a7749", "#b39c66", "#d3bf95", "#e8d8b8", "#f1e4c9", "#f9f1e3"] },
+      "paper-2": { "role": "neutral-bg-2-raised", "displayName": "Ticket Stock", "canonical": "#e8d8b8", "tonalRamp": ["#37301f", "#584c30", "#7f6d45", "#a68f5f", "#c6ac82", "#e8d8b8", "#f1e6cf", "#f8f0e2"] },
+      "paper-ink": { "role": "neutral-text-on-paper", "displayName": "Print Black", "canonical": "#211a13", "tonalRamp": ["#0f0c08", "#211a13", "#332920", "#463831", "#5f4d42", "#7d6a5c", "#a5917f", "#d0c1b3"] },
+      "paper-ink-dim": { "role": "neutral-text-on-paper-dim", "displayName": "Warm Brown", "canonical": "#5a4c3c", "tonalRamp": ["#161209", "#241e15", "#382e21", "#4a3f30", "#5a4c3c", "#7a6a54", "#a3907a", "#cabfae"] },
+      "restaurant": { "role": "neutral-bg-3", "displayName": "Restaurant Dark", "canonical": "#1a120c", "tonalRamp": ["#0d0906", "#1a120c", "#281c14", "#382a1e", "#4f3c2c", "#6f5745", "#998069", "#c9b5a3"] },
+      "checker-dark": { "role": "neutral-accent", "displayName": "Checker Ink", "canonical": "#211a13", "tonalRamp": ["#0f0c08", "#211a13", "#332920", "#463831", "#5f4d42", "#7d6a5c", "#a5917f", "#d0c1b3"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Poster Display (Anton)", "purpose": "Headlines only: hero title, ticket title, menu item names, closing headline." },
+      "label": { "displayName": "Condensed Label (Barlow Condensed)", "purpose": "All uppercase wide-tracked microcopy: category headers, captions, CTA text, prices, stamp text." },
+      "body": { "displayName": "Body (Barlow)", "purpose": "Paragraph copy: menu item descriptions, closing paragraph." }
+    },
+    "shadows": [
+      { "name": "ingredient-cast", "value": "drop-shadow(0 18px 28px rgba(0,0,0,0.45))", "purpose": "Applied to every floating/assembling ingredient image and the assembled burger photo for consistent physical-object lighting." },
+      { "name": "ticket-panel-lift", "value": "0 2px 4px rgba(33,26,19,0.12), 0 28px 46px -14px rgba(33,26,19,0.35)", "purpose": "Menu ticket panel only; contact shadow plus soft ambient cast shadow." }
+    ],
+    "motion": [
+      { "name": "hero-scroll-assembly", "value": "GSAP timeline pinned to ScrollTrigger, start 'top top', end '+=125%', scrub 1, stagger 0.075s per layer, ease power2.inOut", "purpose": "Drives the burger-layer scroll-assembly sequence in the hero." },
+      { "name": "float-idle", "value": "gsap.to loop, y +/-12px, x +/-6px, duration 2.2-3.5s, sine.inOut, yoyo", "purpose": "Idle float applied to each ingredient before scroll assembly begins." },
+      { "name": "reveal-standard", "value": "autoAlpha/y fromTo, duration 0.6-0.9s, power2.out, ScrollTrigger start 'top 65%-70%', toggleActions play none none reverse", "purpose": "Standard section-enter reveal used by menu ticket and closing section content." }
+    ],
+    "breakpoints": [
+      { "name": "mobile-float-cutoff", "value": "640px" },
+      { "name": "sm", "value": "640px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button (CTA)",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single interactive CTA in the build, 'Back to the build' anchor link in the closing section.",
+      "html": "<a class=\"ds-btn-primary\" href=\"#hero\">Back to the build</a>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 12px; background: transparent; color: #ffc772; border: 1px solid rgba(230,161,60,0.6); padding: 12px 28px; font-family: 'Barlow Condensed', sans-serif; font-size: 0.875rem; font-weight: 500; letter-spacing: 0.3em; text-transform: uppercase; text-decoration: none; border-radius: 0; transition: background-color 0.2s; } .ds-btn-primary:hover, .ds-btn-primary:focus-visible { background-color: rgba(230,161,60,0.1); } .ds-btn-primary:focus-visible { outline: 2px solid #ffc772; outline-offset: 2px; }"
+    },
+    {
+      "name": "Menu Ticket Panel",
+      "kind": "card",
+      "refersTo": "ticket-panel",
+      "description": "The diner-ticket menu card: torn bottom edge, slight rotation, paper grain, stamp badge overlapping the top-right corner.",
+      "html": "<div class=\"ds-ticket-panel\"><div class=\"ds-stamp\">&#9679;</div><h2 class=\"ds-ticket-title\">The Ticket</h2><span class=\"ds-ticket-rule\"></span><div class=\"ds-ticket-col\"><h3 class=\"ds-ticket-label\">Chicken</h3><h4 class=\"ds-ticket-item\">The Chicken Chief</h4><p class=\"ds-ticket-desc\">Buttermilk fried chicken, pickles, slaw, house sauce</p></div></div>",
+      "css": ".ds-ticket-panel { position: relative; background-color: #e8d8b8; border: 1px solid rgba(33,26,19,0.15); padding: 40px; transform: rotate(-0.4deg); box-shadow: 0 2px 4px rgba(33,26,19,0.12), 0 28px 46px -14px rgba(33,26,19,0.35); clip-path: polygon(0% 0%, 100% 0%, 100% calc(100% - 10px), 97% 100%, 94% calc(100% - 8px), 91% 100%, 88% calc(100% - 9px), 85% 100%, 79% 100%, 73% 100%, 67% 100%, 61% 100%, 55% 100%, 49% 100%, 43% 100%, 37% 100%, 31% 100%, 25% 100%, 19% 100%, 13% 100%, 7% 100%, 1% 100%, 0% calc(100% - 10px)); } .ds-stamp { position: absolute; top: -32px; right: -20px; width: 80px; height: 80px; border: 1px dashed rgba(184,50,31,0.75); border-radius: 50%; transform: rotate(9deg); } .ds-ticket-title { font-family: Anton, sans-serif; font-size: 2.25rem; letter-spacing: 0.02em; color: #211a13; text-align: center; } .ds-ticket-rule { display: block; width: 64px; height: 1px; margin: 8px auto 24px; background: rgba(184,50,31,0.6); } .ds-ticket-label { font-family: 'Barlow Condensed', sans-serif; font-size: 0.875rem; letter-spacing: 0.35em; text-transform: uppercase; color: #b8321f; margin-bottom: 12px; } .ds-ticket-item { font-family: Anton, sans-serif; font-size: 1.125rem; color: #211a13; } .ds-ticket-desc { font-family: Barlow, Arial, sans-serif; font-size: 0.875rem; line-height: 1.4; color: #5a4c3c; }"
+    },
+    {
+      "name": "Stamp Badge",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Signature circular ink-stamp SVG device: two concentric rings, circular ring-text, and a center burger glyph, rendered in currentColor and rotated when placed.",
+      "html": "<svg class=\"ds-stamp-badge\" viewBox=\"0 0 120 120\" aria-hidden=\"true\"><circle cx=\"60\" cy=\"60\" r=\"54\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-dasharray=\"2.5 3.5\" opacity=\"0.75\"/><circle cx=\"60\" cy=\"60\" r=\"44\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.55\"/><path id=\"ds-stamp-ring\" d=\"M 60,60 m -37,0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0\" fill=\"none\"/><text font-size=\"9.5\" font-family=\"'Barlow Condensed', sans-serif\" font-weight=\"600\" letter-spacing=\"2.5\" fill=\"currentColor\"><textPath href=\"#ds-stamp-ring\" startOffset=\"0%\">FLIIPING BURGERS &#8226; SINCE THIS SCROLL &#8226;</textPath></text><g transform=\"translate(60,63)\" fill=\"currentColor\"><path d=\"M -19,-4 a19,10 0 0 1 38,0 z\"/><rect x=\"-19\" y=\"-4\" width=\"38\" height=\"4.5\" rx=\"1\"/><rect x=\"-17\" y=\"1\" width=\"34\" height=\"7\" rx=\"3.5\" opacity=\"0.85\"/><path d=\"M -19,9.5 a19,6 0 0 0 38,0 z\"/></g></svg>",
+      "css": ".ds-stamp-badge { width: 96px; height: 96px; color: rgba(184,50,31,0.75); transform: rotate(9deg); }"
+    },
+    {
+      "name": "Section Checker Strip",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Thin repeating checkerboard trim used at the top of all three sections as the cross-section connective device.",
+      "html": "<div class=\"ds-checker-strip\"></div>",
+      "css": ".ds-checker-strip { width: 100%; height: 12px; background-image: conic-gradient(#211a13 0.25turn, transparent 0.25turn 0.5turn, #211a13 0.5turn 0.75turn, transparent 0.75turn); background-size: 16px 16px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Diner Ticket, Built Live",
+    "overview": "Fliiping Burgers stages a burger's construction as an event rather than showing the finished product. The system carries one continuous material story across three acts: a dark stage where loose ingredients float and assemble on scroll, a cream diner-ticket paper where the assembled burger anchors a printed menu, and a warm in-restaurant photograph that closes the page. Vintage American diner ephemera — condensed poster display type, checkerboard trim, torn paper edges, a hand-drawn stamp badge — is the connective tissue that makes the three acts read as one world, not three unrelated sections. The palette is deliberately staged rather than uniform: each section owns its own dark-to-warm register (near-black stage, cream paper, amber-lit restaurant), unified only by the diner-red accent and the checkerboard motif that repeats at the top of every section. This is a brief-pinned world (menu-card-inspo.png, full-food-footer-image-inspo.png) — no open-ended exploration was run, so its diner vocabulary is treated as load-bearing, not decorative.",
+    "keyCharacteristics": [
+      "Three-act color staging (dark stage → cream paper → amber restaurant), not a single flat palette",
+      "Condensed, uppercase, wide-tracked labels throughout; no sentence-case microcopy in a label role",
+      "Physical-object framing: torn paper edges, a rotating stamp badge, drop shadows that read as real cast shadows on real objects",
+      "Checkerboard strip is the section-to-section thread, repeated at the top of all three sections",
+      "Motion visualizes construction (scroll-driven assembly) rather than decorating a static layout"
+    ],
+    "rules": [
+      { "name": "The Section-Owns-Its-Register Rule", "body": "Each of the three sections has its own light/dark register (dark stage, cream paper, amber-lit restaurant); do not flatten them to one shared background color. Diner Red is the only color permitted to cross all three unchanged.", "section": "colors" },
+      { "name": "The Rare Red Rule", "body": "Diner Red marks category labels, prices, and thin divider rules — never a large background fill. Its scarcity is what keeps it reading as ink/stamp rather than as branding.", "section": "colors" },
+      { "name": "The Condensed-Label Rule", "body": "Every uppercase, wide-tracked microcopy element (category headers, captions, CTA text, stamp text) uses Barlow Condensed at 0.3em+ letter-spacing — never Anton, never the body face.", "section": "typography" },
+      { "name": "The Matched-Media Float Rule", "body": "Any scroll- or idle-floating element that could overlap centered text on mobile must scale its motion range down via gsap.matchMedia at the 640px boundary, not just resize the element.", "section": "layout" },
+      { "name": "The Object-Not-Panel Shadow Rule", "body": "Shadows exist to make printed/physical objects (ingredient layers, the ticket panel) feel tangible, not to indicate interactive elevation or UI hierarchy. Don't add shadow to a button or nav element to imply clickable.", "section": "elevation" },
+      { "name": "The Zero-Radius Rule", "body": "No component in this system uses border-radius. Corners are hard because the material is paper and print stock, not soft UI chrome.", "section": "shapes" },
+      { "name": "The Torn-Edge-Is-Earned Rule", "body": "The torn-paper edge treatment is reserved for objects standing in for physical ticket/paper stock (the menu panel). Do not apply it decoratively to unrelated UI chrome.", "section": "shapes" }
+    ],
+    "dos": [
+      "Do keep the checkerboard strip (.bg-checker-strip, conic-gradient, 16px tile) at the top of every full-bleed section — it is the confirmed cross-section connective device, now present in all three sections per finish review.",
+      "Do pair the paper-grain noise texture (.bg-grain-paper, SVG feTurbulence) with any paper-toned or dark-stage surface that should read as physical material rather than flat digital color.",
+      "Do use Barlow Condensed at heavy letter-spacing (0.3em+) for every label/category/CTA microcopy element; reserve Anton strictly for headline-weight text.",
+      "Do keep floating/assembling ingredient imagery on a consistent shadow (drop-shadow(0 18px 28px rgba(0,0,0,0.45))) so every layer reads under one light source.",
+      "Do center burger-layer images with margin-based centering (inset-x-0 mx-auto), not translateX(-50%) — the latter was found during finish review to conflict with GSAP's own transform writes on the same element and broke the scroll-assembly end state."
+    ],
+    "donts": [
+      "Don't introduce rounded corners on any panel, button, or card — this system is print/paper-derived and is hard-edged by rule (see The Zero-Radius Rule).",
+      "Don't add drop shadows to buttons or nav-style elements to signal interactivity — shadow in this system means 'physical object,' not 'clickable' (see The Object-Not-Panel Shadow Rule).",
+      "Don't use kicker/eyebrow labels (a small label sitting above a headline announcing its section). None exist in the shipped build; finish review removed them as a banned device, and this is a bare prohibition, not a canonized style.",
+      "Don't apply the torn-edge mask to anything other than genuine paper-stock objects; it is a materiality cue, not decoration."
+    ]
+  }
+}

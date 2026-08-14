@@ -1,0 +1,59 @@
+@theme {
+  --color-source-brand: #b8321f;
+
+  --color-ember-50: #fcf4f3;
+  --color-ember-100: #f8e9e7;
+  --color-ember-200: #f2cfca;
+  --color-ember-300: #e8a196;
+  --color-ember-400: #e06d5d;
+  --color-ember-500: #d23923;
+  --color-ember-600: #af2f1d;
+  --color-ember-700: #902718;
+  --color-ember-800: #762014;
+  --color-ember-900: #57180f;
+  --color-ember-950: #2c0c07;
+
+  /* Light mode semantic tokens */
+  --color-background: #ffffff;
+  --color-foreground: var(--color-ember-950);
+  --color-card: #ffffff;
+  --color-card-foreground: var(--color-ember-900);
+  --color-popover: #ffffff;
+  --color-popover-foreground: var(--color-ember-950);
+  --color-primary: var(--color-ember-600);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--color-ember-100);
+  --color-secondary-foreground: var(--color-ember-900);
+  --color-muted: var(--color-ember-50);
+  --color-muted-foreground: var(--color-ember-600);
+  --color-accent: var(--color-ember-100);
+  --color-accent-foreground: var(--color-ember-900);
+  --color-destructive: #b91c1c;
+  --color-destructive-foreground: #ffffff;
+  --color-border: var(--color-ember-400);
+  --color-input: var(--color-ember-400);
+  --color-ring: var(--color-ember-500);
+  --radius: 0.5rem;
+}
+
+.dark {
+  --color-background: var(--color-ember-950);
+  --color-foreground: var(--color-ember-50);
+  --color-card: var(--color-ember-900);
+  --color-card-foreground: var(--color-ember-50);
+  --color-popover: var(--color-ember-900);
+  --color-popover-foreground: var(--color-ember-50);
+  --color-primary: var(--color-ember-400);
+  --color-primary-foreground: var(--color-ember-950);
+  --color-secondary: var(--color-ember-800);
+  --color-secondary-foreground: var(--color-ember-50);
+  --color-muted: var(--color-ember-800);
+  --color-muted-foreground: var(--color-ember-300);
+  --color-accent: var(--color-ember-800);
+  --color-accent-foreground: var(--color-ember-50);
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: var(--color-ember-950);
+  --color-border: var(--color-ember-500);
+  --color-input: var(--color-ember-500);
+  --color-ring: var(--color-ember-500);
+}
