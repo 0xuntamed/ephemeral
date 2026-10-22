@@ -36,6 +36,8 @@ The status describes current reality; desired state describes the target. Cleanu
 
 The default key is `lower(repository):pull_request:commit_sha`. A unique database constraint guarantees one environment for a webhook identity. A replay returns HTTP 200 with `Idempotency-Replayed: true`; the first request returns HTTP 201.
 
+Once an environment is `DESTROYED` or `FAILED_CLEANED`, its key is released on the next request: the old record's key is renamed to `<key>#released:<id>`, an event records the release, and the request provisions a fresh environment (HTTP 201). This lets a CI re-run for the same commit recover after the TTL reaper removed its preview. An environment that is still being torn down keeps its key, because its cloud resources and listener priority still exist; the request returns it with `desired_state: DESTROYED`.
+
 ## TTL reaper
 
 Every environment has `expires_at`. Each reconciliation pass marks expired active environments with desired state `DESTROYED`. A subsequent worker claim performs provider cleanup. This is independent of PR-close delivery.

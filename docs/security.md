@@ -9,7 +9,7 @@
 
 ## Authentication and authorization
 
-`EPHEMERAL_API_KEY` enables bearer authentication for API and metrics endpoints. It is suitable for the demo but not a complete multi-tenant authorization system. Production should terminate OIDC at an identity-aware proxy or add JWT validation and repository/owner authorization in the API.
+`EPHEMERAL_API_KEY` enables bearer authentication for API and metrics endpoints. With `PROVIDER=terraform` the API refuses to start without it, so a missing secret fails closed instead of exposing endpoints that create and destroy infrastructure; the standalone worker serves no HTTP and does not need it. It is suitable for the demo but not a complete multi-tenant authorization system. Production should terminate OIDC at an identity-aware proxy or add JWT validation and repository/owner authorization in the API.
 
 Preview endpoints are intentionally unauthenticated in the local simulator. Put production previews behind your access proxy or ALB OIDC when the application is not public.
 

@@ -94,6 +94,16 @@ func Load() (Config, error) {
 	return cfg, nil
 }
 
+// ValidateAPI rejects configuration that would serve infrastructure-changing endpoints
+// without authentication. Load does not enforce it: the standalone worker serves no HTTP
+// and should not need the API secret.
+func (c Config) ValidateAPI() error {
+	if c.Provider == "terraform" && c.APIKey == "" {
+		return fmt.Errorf("EPHEMERAL_API_KEY is required when PROVIDER=terraform; without it anyone who can reach the API can create and destroy cloud infrastructure")
+	}
+	return nil
+}
+
 func env(key, fallback string) string {
 	if value := strings.TrimSpace(os.Getenv(key)); value != "" {
 		return value

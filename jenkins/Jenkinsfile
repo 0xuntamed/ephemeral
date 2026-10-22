@@ -108,6 +108,9 @@ pipeline {
               if (item.status in ['FAILED', 'ORPHANED']) {
                 error("Preview provisioning failed: ${item.last_error}")
               }
+              if (item.desired_state == 'DESTROYED') {
+                error("Preview ${item.id} is being torn down (status ${item.status}); re-run this build once cleanup finishes.")
+              }
               if (item.status == 'READY') {
                 env.PREVIEW_URL = item.preview_url
                 return true

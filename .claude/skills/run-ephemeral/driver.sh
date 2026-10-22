@@ -3,7 +3,7 @@
 #
 #   .claude/skills/run-ephemeral/driver.sh start        build API, launch API + dashboard, wait until healthy
 #   .claude/skills/run-ephemeral/driver.sh status       what is listening on :8080 / :5173
-#   .claude/skills/run-ephemeral/driver.sh smoke        create -> READY -> preview -> idempotency -> delete -> DESTROYED
+#   .claude/skills/run-ephemeral/driver.sh smoke        create -> READY -> preview -> idempotency -> delete -> re-create -> delete
 #   .claude/skills/run-ephemeral/driver.sh screenshot [out.png] [WxH]   headless Chrome/Edge screenshot of the dashboard
 #   .claude/skills/run-ephemeral/driver.sh logs         tail API + dashboard logs
 #   .claude/skills/run-ephemeral/driver.sh stop         kill whatever listens on :8080 / :5173
@@ -111,9 +111,9 @@ wait_status() { # id wanted timeout_seconds
 
 smoke() {
   wait_http "$API/readyz" 5 || die "API not running - run '$0 start' first"
-  # Fresh SHA per run: idempotency on repo+PR+SHA is permanent, so reusing a key after
-  # DELETE returns the old DESTROYED record instead of provisioning a new environment.
-  local sha key body created again id preview
+  # Fresh SHA per run so each smoke starts from its own environment, never one an earlier
+  # run left mid-teardown under the same key.
+  local sha key body created again id preview replacement
   sha="$(node -e 'console.log(require("crypto").randomBytes(6).toString("hex"))')"
   key="acme/billing-api:127:$sha"
   body='{"repository":"acme/billing-api","branch":"feature/new-checkout","commit_sha":"'"$sha"'","pull_request":127,"owner":"smoke","image":"demo-service:latest","ttl":"6h","resources":{"cpu":512,"memory":1024,"database_mode":"shared-schema"}}'
@@ -145,6 +145,16 @@ smoke() {
 
   curl -sf -X DELETE "$API/api/v1/environments/$id" >/dev/null || die "DELETE failed"
   wait_status "$id" DESTROYED 30
+
+  # A destroyed environment releases its key, so the same request must provision a fresh one.
+  again="$(curl -sf -X POST "$API/api/v1/environments" -H 'Content-Type: application/json' -H "Idempotency-Key: $key" -d "$body")" \
+    || die "re-POST after destroy failed"
+  replacement="$(json "$again" d.id)"
+  [ "$replacement" != "$id" ] || die "re-POST after destroy replayed the destroyed environment"
+  log "re-POST after destroy created $replacement"
+  wait_status "$replacement" READY 30
+  curl -sf -X DELETE "$API/api/v1/environments/$replacement" >/dev/null || die "DELETE failed"
+  wait_status "$replacement" DESTROYED 30
   log "PASS"
 }
 
