@@ -132,9 +132,17 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (*environment.E
 		return nil, false, err
 	}
 	for _, item := range existing {
-		if item.IdempotencyKey == input.IdempotencyKey {
+		if item.IdempotencyKey != input.IdempotencyKey {
+			continue
+		}
+		if item.Status != environment.StatusDestroyed && item.Status != environment.StatusFailedCleaned {
 			s.counters.idempotentHits.Add(1)
 			return item, false, nil
+		}
+		// The environment and its cloud resources are gone, so replaying it would hand the
+		// caller a dead preview. Release the key and provision a fresh one instead.
+		if err := s.releaseIdempotencyKey(ctx, item.ID, input.IdempotencyKey); err != nil {
+			return nil, false, err
 		}
 	}
 	if err := s.config.Policy.ValidateCapacity(existing, input.Owner, input.Repository); err != nil {
@@ -175,6 +183,26 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (*environment.E
 		s.counters.idempotentHits.Add(1)
 	}
 	return saved, created, nil
+}
+
+// releaseIdempotencyKey renames a terminal environment's key so a new request can claim it.
+// Concurrent callers are safe: only the first rename applies, and the store's unique key
+// lets exactly one of the creates that follow win while the rest replay the winner.
+func (s *Service) releaseIdempotencyKey(ctx context.Context, id, key string) error {
+	now := s.now().UTC()
+	_, err := s.store.Update(ctx, id, func(item *environment.Environment) error {
+		if item.IdempotencyKey != key {
+			return errNotCandidate
+		}
+		item.IdempotencyKey = key + "#released:" + item.ID
+		item.UpdatedAt = now
+		item.AddEvent(item.Status, "Idempotency key released to a new environment request", now)
+		return nil
+	})
+	if errors.Is(err, errNotCandidate) {
+		return nil
+	}
+	return err
 }
 
 func (s *Service) Get(ctx context.Context, id string) (*environment.Environment, error) {

@@ -79,6 +79,84 @@ func TestDestroyIsAsynchronousAndIdempotent(t *testing.T) {
 	}
 }
 
+func TestCreateAfterDestroyProvisionsFreshEnvironment(t *testing.T) {
+	service := newTestService(t)
+	ctx := context.Background()
+	first, _, err := service.Create(ctx, validCreateInput())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := service.ProcessOnce(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.RequestDestroy(ctx, first.ID, "TTL expired"); err != nil {
+		t.Fatal(err)
+	}
+	if err := service.ProcessOnce(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	// A CI re-run for the same commit after the preview expired must get a live
+	// environment, not the destroyed record it would otherwise wait on forever.
+	second, created, err := service.Create(ctx, validCreateInput())
+	if err != nil {
+		t.Fatalf("create after destroy: %v", err)
+	}
+	if !created || second.ID == first.ID {
+		t.Fatalf("create after destroy returned %s (created=%v, status %s), want a new environment", second.ID, created, second.Status)
+	}
+	if err := service.ProcessOnce(ctx); err != nil {
+		t.Fatal(err)
+	}
+	ready, err := service.Get(ctx, second.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ready.Status != environment.StatusReady {
+		t.Fatalf("replacement status = %s, want READY", ready.Status)
+	}
+	old, err := service.Get(ctx, first.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if old.Status != environment.StatusDestroyed || old.IdempotencyKey == second.IdempotencyKey {
+		t.Fatalf("destroyed record should keep its status and give up its key: status %s, key %q", old.Status, old.IdempotencyKey)
+	}
+
+	replay, created, err := service.Create(ctx, validCreateInput())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if created || replay.ID != second.ID {
+		t.Fatalf("replay returned %s (created=%v), want idempotent replay of %s", replay.ID, created, second.ID)
+	}
+}
+
+func TestCreateDuringTeardownReturnsTearingDownEnvironment(t *testing.T) {
+	service := newTestService(t)
+	ctx := context.Background()
+	first, _, err := service.Create(ctx, validCreateInput())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := service.ProcessOnce(ctx); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := service.RequestDestroy(ctx, first.ID, "pull request closed"); err != nil {
+		t.Fatal(err)
+	}
+
+	// Cloud resources still exist until cleanup finishes, so the key is not released;
+	// callers see desired_state DESTROYED and can fail fast.
+	again, created, err := service.Create(ctx, validCreateInput())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if created || again.ID != first.ID || again.DesiredState != environment.DesiredDestroyed {
+		t.Fatalf("got %s (created=%v, desired %s), want the tearing-down %s", again.ID, created, again.DesiredState, first.ID)
+	}
+}
+
 func TestTTLReaperSchedulesCleanup(t *testing.T) {
 	service := newTestService(t)
 	now := time.Date(2026, 8, 12, 8, 0, 0, 0, time.UTC)

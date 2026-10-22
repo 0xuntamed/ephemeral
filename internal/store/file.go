@@ -168,9 +168,21 @@ func (s *FileStore) Update(_ context.Context, id string, mutate func(*environmen
 	if err := updated.Validate(); err != nil {
 		return nil, err
 	}
+	keyChanged := updated.IdempotencyKey != current.IdempotencyKey
+	if keyChanged {
+		if _, taken := s.byKey[updated.IdempotencyKey]; taken {
+			return nil, ErrConflict
+		}
+		delete(s.byKey, current.IdempotencyKey)
+		s.byKey[updated.IdempotencyKey] = id
+	}
 	s.items[id] = updated
 	if err := s.persistLocked(); err != nil {
 		s.items[id] = current
+		if keyChanged {
+			delete(s.byKey, updated.IdempotencyKey)
+			s.byKey[current.IdempotencyKey] = id
+		}
 		return nil, err
 	}
 	return updated.Clone(), nil

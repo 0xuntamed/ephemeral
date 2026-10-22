@@ -23,6 +23,10 @@ func main() {
 		logger.Error("load configuration", "error", err)
 		os.Exit(1)
 	}
+	if err := cfg.ValidateAPI(); err != nil {
+		logger.Error("load configuration", "error", err)
+		os.Exit(1)
+	}
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 	service, repository, err := app.Build(ctx, cfg, logger)

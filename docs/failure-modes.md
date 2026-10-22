@@ -3,6 +3,9 @@
 | Failure | Detection | Recovery |
 |---|---|---|
 | Duplicate webhook | Unique idempotency key | Return existing environment |
+| CI re-run after the preview was destroyed | Key matches a `DESTROYED`/`FAILED_CLEANED` record | Release the old key and provision a fresh environment |
+| CI re-run while the preview is being torn down | Returned environment has `desired_state: DESTROYED` | Jenkins fails fast; re-run once cleanup finishes |
+| API started with `PROVIDER=terraform` and no `EPHEMERAL_API_KEY` | Startup validation | API refuses to start instead of serving unauthenticated provisioning |
 | CI dies after create | Durable desired state | Worker continues independently |
 | Terraform apply fails | Provider error | Mark `FAILED`, preserve diagnostics, allow retry/cleanup |
 | Partial AWS resources | Terraform workspace state | Destroy from the same workspace |

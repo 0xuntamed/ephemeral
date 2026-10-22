@@ -161,9 +161,9 @@ func (s *PostgresStore) Update(ctx context.Context, id string, mutate func(*envi
 	}
 	result, err := tx.ExecContext(ctx, `
 		UPDATE environments SET status=$2, desired_state=$3, repository=$4, owner=$5,
-		pull_request=$6, expires_at=$7, updated_at=$8, document=$9 WHERE id=$1`,
+		pull_request=$6, expires_at=$7, updated_at=$8, document=$9, idempotency_key=$10 WHERE id=$1`,
 		item.ID, item.Status, item.DesiredState, item.Repository, item.Owner,
-		item.PullRequest, item.ExpiresAt, item.UpdatedAt, document,
+		item.PullRequest, item.ExpiresAt, item.UpdatedAt, document, item.IdempotencyKey,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("update environment: %w", err)

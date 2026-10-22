@@ -130,7 +130,7 @@ The included platform Terraform is a cost-conscious reference baseline: Fargate 
 | `MAX_ENVIRONMENTS_PER_REPO` | `10` | Active environment quota per repository |
 | `WORKER_CONCURRENCY` | `4` | Parallel lifecycle operations |
 | `OPERATION_TIMEOUT` | `20m` | Provision/destroy lease and deadline |
-| `EPHEMERAL_API_KEY` | empty | Optional bearer token for API/metrics |
+| `EPHEMERAL_API_KEY` | empty | Bearer token for API/metrics; required with `PROVIDER=terraform` |
 | `TERRAFORM_BACKEND_CONFIG` | empty | Absolute or relative S3 backend config path |
 
 See [.env.example](.env.example) for every setting.
