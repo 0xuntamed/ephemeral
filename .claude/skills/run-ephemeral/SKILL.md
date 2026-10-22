@@ -31,9 +31,10 @@ build), warm ≈ 7 s; both processes keep running after the command returns.
 ```bash
 .claude/skills/run-ephemeral/driver.sh smoke
 ```
-Full lifecycle in ~5 s, exits non-zero on the first failure: create (fresh commit SHA) →
+Full lifecycle in ~10 s, exits non-zero on the first failure: create (fresh commit SHA) →
 `READY` → preview page 200 → idempotent re-POST returns same id → `/metrics` 200 →
-dashboard proxy 200 → `DELETE` → `DESTROYED` → `PASS`. Safe to re-run.
+dashboard proxy 200 → `DELETE` → `DESTROYED` → same request again creates a fresh environment →
+`READY` → `DELETE` → `DESTROYED` → `PASS`. Safe to re-run.
 
 ```bash
 .claude/skills/run-ephemeral/driver.sh screenshot
@@ -52,8 +53,8 @@ row of environment cards). Optional args: output path and `W,H`, e.g.
 .claude/skills/run-ephemeral/driver.sh stop
 ```
 
-To make a screenshot show a live environment, create one with a commit SHA not used before in
-this run (new → HTTP 201; a replayed key → HTTP 200 with the old record):
+To make a screenshot show a live environment, create one (HTTP 201 when the key is new or its
+environment is `DESTROYED`; HTTP 200 replays a live one):
 
 ```bash
 curl -s -o /dev/null -w "create: %{http_code}\n" -X POST http://localhost:8080/api/v1/environments \
@@ -87,9 +88,11 @@ nginx dashboard on :3000) but was **not verified** — the Docker daemon was not
 
 ## Gotchas
 
-- **Idempotency on repo + PR + commit SHA is permanent.** After `DELETE`, POSTing the same key
-  returns the old `DESTROYED` record (HTTP 200), not a new environment. Change `commit_sha` to
-  reprovision. The driver's `smoke` generates a fresh SHA per run for this reason.
+- **Idempotency on repo + PR + commit SHA covers live environments only.** Once an environment
+  is `DESTROYED`, the next POST with its key renames the old record's key to
+  `<key>#released:<id>` and creates a fresh environment (HTTP 201). While it is still being torn
+  down, the POST returns it (HTTP 200, `desired_state: DESTROYED`) — wait for `DESTROYED`, then
+  POST again. Servers built before this change returned the `DESTROYED` record forever.
 - **Kill by port, never by process name.** `go run` runs a temp-dir child exe, and `npm run dev`
   → `npx` → `node`, so killing the launcher leaves the port bound. On this machine ~10 unrelated
   `node.exe` processes belong to Claude Code and its tooling — `taskkill //IM node.exe` would take
@@ -114,8 +117,7 @@ nginx dashboard on :3000) but was **not verified** — the Docker daemon was not
 
 | Symptom | Fix |
 |---|---|
-| `smoke`: `stuck at 'DESTROYED' (wanted READY)` | Reused idempotency key — see first gotcha. Fixed in `smoke`; in hand-written curl, change `commit_sha`. |
+| POST returns HTTP 200 with `desired_state: DESTROYED` | The environment for that key is still being torn down — see first gotcha. POST again once it reaches `DESTROYED`. |
 | `screenshot`: `FAIL: screenshot not written` | Relative `--screenshot` path — fixed in the driver. If it recurs, run the Chrome command with `--enable-logging=stderr --v=0`. |
 | `start`: `:8080 already in use` / `:5173 already in use` | `driver.sh stop`, then `start` again. |
 | `go: -race requires cgo; enable cgo by setting CGO_ENABLED=1` | Run `go test` without `-race`. |
-| Dashboard shows `READY 00` right after a POST | The POST replayed a destroyed environment (HTTP 200, not 201). Use a fresh SHA. |
